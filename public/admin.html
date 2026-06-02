@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bloomora Admin Dashboard</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:#f7f3f2;color:#2b1f22}.layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh}.sidebar{background:#24181c;color:white;padding:24px;position:sticky;top:0;height:100vh}.brand{font-size:24px;font-weight:950;color:#ff9aae;margin-bottom:32px}.menu button{display:block;width:100%;text-align:left;background:transparent;color:rgba(255,255,255,.72);border:0;padding:14px 16px;border-radius:14px;font-weight:900;margin:6px 0}.menu button.active,.menu button:hover{background:#c85b72;color:white}.main{padding:28px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}.top h1{margin:0;font-size:34px;letter-spacing:-1px}.btn{border:0;border-radius:14px;padding:12px 16px;font-weight:900;cursor:pointer}.btn-primary{background:#c85b72;color:white}.btn-dark{background:#24181c;color:white}.btn-light{background:white;color:#24181c;border:1px solid #ead4d8}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}.card{background:white;border-radius:22px;padding:22px;box-shadow:0 12px 36px rgba(0,0,0,.06)}.card .label{color:#7b6268;font-weight:800;font-size:13px}.card .value{font-size:30px;font-weight:950;margin-top:8px}.panel{background:white;border-radius:24px;padding:22px;box-shadow:0 12px 36px rgba(0,0,0,.06);margin-bottom:20px}.panel h2{margin-top:0}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}input,textarea,select{width:100%;padding:13px;border:1px solid #ead4d8;border-radius:13px;margin-bottom:10px;font-family:inherit}label{font-size:13px;font-weight:900;color:#5c454d;margin-bottom:6px;display:block}.table{width:100%;border-collapse:collapse}.table th,.table td{text-align:left;padding:14px;border-bottom:1px solid #f0e1e3;vertical-align:top}.table th{color:#7b6268;font-size:13px}.product-img{width:60px;height:60px;object-fit:cover;border-radius:14px}.actions{display:flex;gap:8px;flex-wrap:wrap}.hide{display:none}.status{display:inline-block;padding:7px 10px;border-radius:999px;font-size:12px;font-weight:950;background:#fde8eb;color:#c85b72}.login{max-width:420px;margin:9vh auto;background:white;border-radius:28px;padding:34px;box-shadow:0 20px 60px rgba(0,0,0,.08)}.login h1{margin-top:0}.muted{color:#7b6268;line-height:1.6}.order-items{font-size:13px;color:#5e4a50;line-height:1.6}
+    @media(max-width:900px){.layout{grid-template-columns:1fr}.sidebar{height:auto;position:relative}.cards{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr}.table{font-size:13px}.main{padding:16px}}
+    @media(max-width:520px){.cards{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div id="loginPage" class="login">
+    <h1>Admin Login</h1>
+    <p class="muted">Demo admin login. You can change this password inside admin.html later.</p>
+    <label>Email</label>
+    <input id="loginEmail" placeholder="admin@flower.com" />
+    <label>Password</label>
+    <input id="loginPassword" type="password" placeholder="Password" />
+    <button class="btn btn-primary" style="width:100%" onclick="login()">Login</button>
+    <p class="muted">Default: admin@flower.com / admin123</p>
+  </div>
+
+  <div id="app" class="layout hide">
+    <aside class="sidebar">
+      <div class="brand">Bloomora Admin</div>
+      <div class="menu">
+        <button class="active" onclick="showPage('dashboard', this)">Dashboard</button>
+        <button onclick="showPage('products', this)">Products</button>
+        <button onclick="showPage('orders', this)">Orders</button>
+        <button onclick="showPage('settings', this)">Settings</button>
+        <button onclick="logout()">Logout</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="top">
+        <div>
+          <h1 id="pageTitle">Dashboard</h1>
+          <p class="muted">Manage products, orders and payment status.</p>
+        </div>
+        <a class="btn btn-light" href="/" style="text-decoration:none;">View Website</a>
+      </div>
+
+      <section id="dashboardPage">
+        <div class="cards">
+          <div class="card"><div class="label">Total Products</div><div class="value" id="statProducts">0</div></div>
+          <div class="card"><div class="label">Total Orders</div><div class="value" id="statOrders">0</div></div>
+          <div class="card"><div class="label">Total Sales</div><div class="value">RM <span id="statSales">0</span></div></div>
+          <div class="card"><div class="label">Pending Orders</div><div class="value" id="statPending">0</div></div>
+        </div>
+
+        <div class="panel">
+          <h2>Latest Orders</h2>
+          <div id="latestOrders"></div>
+        </div>
+      </section>
+
+      <section id="productsPage" class="hide">
+        <div class="panel">
+          <h2 id="productFormTitle">Add Product</h2>
+          <input type="hidden" id="productId" />
+          <div class="grid2">
+            <div>
+              <label>Product Name</label>
+              <input id="productName" placeholder="Pink Romance Bouquet" />
+            </div>
+            <div>
+              <label>Category</label>
+              <input id="productCategory" placeholder="Love / Birthday / Opening" />
+            </div>
+          </div>
+
+          <label>Description</label>
+          <textarea id="productDescription" rows="3" placeholder="Product description"></textarea>
+
+          <div class="grid2">
+            <div>
+              <label>Price</label>
+              <input id="productPrice" type="number" placeholder="168" />
+            </div>
+            <div>
+              <label>Active</label>
+              <select id="productActive">
+                <option value="true">Active</option>
+                <option value="false">Hidden</option>
+              </select>
+            </div>
+          </div>
+
+          <label>Image URL</label>
+          <input id="productImage" placeholder="https://..." />
+
+          <button class="btn btn-primary" onclick="saveProduct()">Save Product</button>
+          <button class="btn btn-light" onclick="resetProductForm()">Clear</button>
+        </div>
+
+        <div class="panel">
+          <h2>Product List</h2>
+          <table class="table">
+            <thead>
+              <tr><th>Image</th><th>Product</th><th>Category</th><th>Price</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="productsTable"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="ordersPage" class="hide">
+        <div class="panel">
+          <h2>Orders</h2>
+          <table class="table">
+            <thead>
+              <tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Payment</th><th>Order Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="ordersTable"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="settingsPage" class="hide">
+        <div class="panel">
+          <h2>Settings</h2>
+          <p class="muted">For this phase, settings are still inside code.</p>
+          <p><b>WhatsApp number:</b> Change it inside public/index.html → WHATSAPP_NUMBER</p>
+          <p><b>Admin password:</b> Change it inside public/admin.html → ADMIN_PASSWORD</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const ADMIN_EMAIL = "admin@flower.com";
+    const ADMIN_PASSWORD = "admin123";
+
+    let products = [];
+    let orders = [];
+
+    function money(value){return Number(value || 0).toFixed(0)}
+
+    function login(){
+      const email = document.getElementById("loginEmail").value;
+      const password = document.getElementById("loginPassword").value;
+
+      if(email === ADMIN_EMAIL && password === ADMIN_PASSWORD){
+        localStorage.setItem("bloomora_admin_login", "yes");
+        document.getElementById("loginPage").classList.add("hide");
+        document.getElementById("app").classList.remove("hide");
+        loadAll();
+      } else {
+        alert("Wrong email or password.");
+      }
+    }
+
+    function logout(){
+      localStorage.removeItem("bloomora_admin_login");
+      location.reload();
+    }
+
+    function showPage(page, btn){
+      document.querySelectorAll(".menu button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      document.getElementById("dashboardPage").classList.add("hide");
+      document.getElementById("productsPage").classList.add("hide");
+      document.getElementById("ordersPage").classList.add("hide");
+      document.getElementById("settingsPage").classList.add("hide");
+
+      document.getElementById(page + "Page").classList.remove("hide");
+      document.getElementById("pageTitle").innerText = page.charAt(0).toUpperCase() + page.slice(1);
+
+      if(page === "products") loadProducts();
+      if(page === "orders") loadOrders();
+      if(page === "dashboard") loadStats();
+    }
+
+    async function loadAll(){
+      await loadStats();
+      await loadProducts();
+      await loadOrders();
+    }
+
+    async function loadStats(){
+      const res = await fetch("/api/admin/stats");
+      const stats = await res.json();
+
+      document.getElementById("statProducts").innerText = stats.totalProducts || 0;
+      document.getElementById("statOrders").innerText = stats.totalOrders || 0;
+      document.getElementById("statSales").innerText = money(stats.totalSales || 0);
+      document.getElementById("statPending").innerText = stats.pendingOrders || 0;
+    }
+
+    async function loadProducts(){
+      const res = await fetch("/api/admin/products");
+      products = await res.json();
+
+      document.getElementById("productsTable").innerHTML = products.map(p => `
+        <tr>
+          <td><img class="product-img" src="${p.image_url || ""}" /></td>
+          <td><b>${p.name}</b><br><span class="muted">${p.description || ""}</span></td>
+          <td>${p.category || ""}</td>
+          <td>RM ${money(p.price)}</td>
+          <td><span class="status">${p.is_active ? "Active" : "Hidden"}</span></td>
+          <td>
+            <div class="actions">
+              <button class="btn btn-light" onclick="editProduct(${p.id})">Edit</button>
+              <button class="btn btn-dark" onclick="deleteProduct(${p.id})">Delete</button>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function resetProductForm(){
+      document.getElementById("productId").value = "";
+      document.getElementById("productName").value = "";
+      document.getElementById("productCategory").value = "";
+      document.getElementById("productDescription").value = "";
+      document.getElementById("productPrice").value = "";
+      document.getElementById("productImage").value = "";
+      document.getElementById("productActive").value = "true";
+      document.getElementById("productFormTitle").innerText = "Add Product";
+    }
+
+    function editProduct(id){
+      const p = products.find(item => Number(item.id) === Number(id));
+      if(!p) return;
+
+      document.getElementById("productId").value = p.id;
+      document.getElementById("productName").value = p.name || "";
+      document.getElementById("productCategory").value = p.category || "";
+      document.getElementById("productDescription").value = p.description || "";
+      document.getElementById("productPrice").value = p.price || "";
+      document.getElementById("productImage").value = p.image_url || "";
+      document.getElementById("productActive").value = String(p.is_active);
+      document.getElementById("productFormTitle").innerText = "Edit Product";
+      window.scrollTo({top:0, behavior:"smooth"});
+    }
+
+    async function saveProduct(){
+      const id = document.getElementById("productId").value;
+      const payload = {
+        name: document.getElementById("productName").value,
+        category: document.getElementById("productCategory").value,
+        description: document.getElementById("productDescription").value,
+        price: Number(document.getElementById("productPrice").value),
+        image_url: document.getElementById("productImage").value,
+        is_active: document.getElementById("productActive").value === "true"
+      };
+
+      if(!payload.name || !payload.price){
+        alert("Product name and price are required.");
+        return;
+      }
+
+      const url = id ? `/api/admin/products/${id}` : "/api/admin/products";
+      const method = id ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(payload)
+      });
+
+      const result = await res.json();
+      if(!res.ok){
+        alert(result.error || "Failed to save product.");
+        return;
+      }
+
+      resetProductForm();
+      await loadProducts();
+      await loadStats();
+      alert("Product saved.");
+    }
+
+    async function deleteProduct(id){
+      if(!confirm("Delete this product?")) return;
+
+      const res = await fetch(`/api/admin/products/${id}`, { method: "DELETE" });
+      const result = await res.json();
+
+      if(!res.ok){
+        alert(result.error || "Failed to delete product.");
+        return;
+      }
+
+      await loadProducts();
+      await loadStats();
+    }
+
+    async function loadOrders(){
+      const res = await fetch("/api/admin/orders");
+      orders = await res.json();
+
+      const rows = orders.map(order => {
+        const itemsHtml = (order.items || []).map(item => `${item.product_name} x${item.qty}`).join("<br>");
+
+        return `
+          <tr>
+            <td><b>#${order.id}</b><br><span class="muted">${new Date(order.created_at).toLocaleString()}</span></td>
+            <td><b>${order.customer_name}</b><br>${order.phone}<br><span class="muted">${order.address}</span></td>
+            <td class="order-items">${itemsHtml}</td>
+            <td><b>RM ${money(order.total)}</b></td>
+            <td>
+              <select onchange="updateOrderStatus(${order.id}, null, this.value)">
+                ${["pending","paid","failed","refunded"].map(s => `<option ${order.payment_status===s?"selected":""}>${s}</option>`).join("")}
+              </select>
+            </td>
+            <td>
+              <select onchange="updateOrderStatus(${order.id}, this.value, null)">
+                ${["new","preparing","out_for_delivery","completed","cancelled"].map(s => `<option ${order.order_status===s?"selected":""}>${s}</option>`).join("")}
+              </select>
+            </td>
+            <td><button class="btn btn-light" onclick="copyOrder(${order.id})">Copy</button></td>
+          </tr>
+        `;
+      }).join("");
+
+      document.getElementById("ordersTable").innerHTML = rows || "<tr><td colspan='7'>No orders yet.</td></tr>";
+      document.getElementById("latestOrders").innerHTML = orders.slice(0, 5).map(o => `
+        <p><b>#${o.id}</b> ${o.customer_name} — RM ${money(o.total)} — <span class="status">${o.order_status}</span></p>
+      `).join("") || "<p class='muted'>No orders yet.</p>";
+    }
+
+    async function updateOrderStatus(id, order_status, payment_status){
+      const payload = {};
+      if(order_status) payload.order_status = order_status;
+      if(payment_status) payload.payment_status = payment_status;
+
+      const res = await fetch(`/api/admin/orders/${id}/status`, {
+        method: "PUT",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(payload)
+      });
+
+      const result = await res.json();
+      if(!res.ok){
+        alert(result.error || "Failed to update order.");
+        return;
+      }
+
+      await loadStats();
+    }
+
+    function copyOrder(id){
+      const order = orders.find(o => Number(o.id) === Number(id));
+      if(!order) return;
+
+      const items = (order.items || []).map(i => `${i.product_name} x${i.qty}`).join("\n");
+      const text = `Order #${order.id}\nCustomer: ${order.customer_name}\nPhone: ${order.phone}\nAddress: ${order.address}\nItems:\n${items}\nTotal: RM${money(order.total)}\nPayment: ${order.payment_status}\nStatus: ${order.order_status}`;
+
+      navigator.clipboard.writeText(text);
+      alert("Order copied.");
+    }
+
+    if(localStorage.getItem("bloomora_admin_login") === "yes"){
+      document.getElementById("loginPage").classList.add("hide");
+      document.getElementById("app").classList.remove("hide");
+      loadAll();
+    }
+  </script>
+</body>
+</html>
